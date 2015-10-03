@@ -152,9 +152,11 @@ namespace NerdAmigo.Common.Aws.DynamoDb
 
 			if(underlyingType == typeof(DateTime))
 			{
-				parseExpression = Expression.Call(
-					underlyingType.GetMethod("Parse", new Type[] { typeof(string) }),
-					Expression.Property(attributeValueExpression, typeof(AttributeValue).GetProperty("S"))
+				parseExpression = Expression.Convert(
+					Expression.Call(
+						underlyingType.GetMethod("Parse", new Type[] { typeof(string) }),
+						Expression.Property(attributeValueExpression, typeof(AttributeValue).GetProperty("S"))
+					), propType
 				);
 			}
 			
@@ -333,11 +335,18 @@ namespace NerdAmigo.Common.Aws.DynamoDb
 			{
 				//date
 				setMethodName = "S";
-				attributeValueExpression = Expression.Call(objValueExpression, propType.GetMethod("ToString", new[] { typeof(string) }), Expression.Constant("o"));
 
 				if (isNullable)
 				{
+					attributeValueExpression = Expression.Call(
+						Expression.Property(objValueExpression, "Value"), 
+						underlyingType.GetMethod("ToString", new[] { typeof(string) }), Expression.Constant("o")
+					);
 					isNullExpression = Expression.Equal(Expression.Constant(null), objValueExpression);
+				}
+				else
+				{
+					attributeValueExpression = Expression.Call(objValueExpression, underlyingType.GetMethod("ToString", new[] { typeof(string) }), Expression.Constant("o"));
 				}
 			}
 

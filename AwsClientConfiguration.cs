@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NerdAmigo.Common.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,26 @@ namespace NerdAmigo.Common.Aws
 		public Amazon.RegionEndpoint GetEndpoint()
 		{
 			return Amazon.RegionEndpoint.GetBySystemName(this.RegionEndpointSystemName);
+		}
+
+		public override bool Equals(object obj)
+		{
+			var other = obj as AwsClientConfiguration;
+			if (other == null)
+			{
+				return false;
+			}
+
+			return this.AccessKeyId == other.AccessKeyId &&
+				this.SecretAccessKey == other.SecretAccessKey &&
+				this.RegionEndpointSystemName == other.RegionEndpointSystemName;
+		}
+
+		public override int GetHashCode()
+		{
+			return this.AccessKeyId.GetHashCode() ^ 
+				this.RegionEndpointSystemName.GetHashCode() ^ 
+				this.SecretAccessKey.GetHashCode();
 		}
 
 		public object Clone()
